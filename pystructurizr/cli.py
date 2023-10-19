@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import subprocess
+import webbrowser
 
 import click
 
@@ -52,6 +53,24 @@ def dev(view):
         await observe_modules(modules_to_watch, async_behavior)
 
     asyncio.run(observe_loop())
+
+
+@click.command()
+@click.option('--view', prompt='Your view file (e.g. examples.single_file_example)',
+              help='The view file to render.')
+def render(view):
+    click.echo("Rendering SVG diagram...")
+    diagram_code, _ = generate_diagram_code_in_child_process(view)
+
+    async def _async_behavior():
+        # Generate SVG
+        await generate_svg(diagram_code, 'output')
+
+    asyncio.run(_async_behavior())
+    filename = f'output/{view}.svg'
+    shutil.copy('output/diagram.svg', filename)
+    print(f"Rendered SVG saved in {filename}")
+    webbrowser.open_new_tab("output/index.html")
 
 
 @click.command()
