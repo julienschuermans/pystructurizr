@@ -18,3 +18,7 @@ build/
 gcs_credentials.json
 
 .idea/
+
+# Virtual environment
+.venv/
+venv/
