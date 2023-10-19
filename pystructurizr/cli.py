@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import shutil
+import signal
 import subprocess
 import webbrowser
 
@@ -49,8 +50,17 @@ def dev(view):
         modules_to_watch = await async_behavior()
         click.echo("Launching webserver...")
         # pylint: disable=consider-using-with
-        subprocess.Popen(f"httpwatcher --root {tmp_folder} --watch {tmp_folder}", shell=True)
-        await observe_modules(modules_to_watch, async_behavior)
+        proc = subprocess.Popen(
+            f"httpwatcher --root {tmp_folder} --watch {tmp_folder}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            preexec_fn=os.setsid,
+        )
+        try:
+            await observe_modules(modules_to_watch, async_behavior)
+        except:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            raise
 
     asyncio.run(observe_loop())
 
@@ -107,6 +117,7 @@ def cli():
 cli.add_command(dump)
 cli.add_command(dev)
 cli.add_command(build)
+cli.add_command(render)
 
 if __name__ == '__main__':
     cli()
