@@ -37,14 +37,13 @@ def generate_diagram_code_in_child_process(view: str) -> Tuple[Dict, List[str]]:
 
 async def generate_svg(diagram_code: Dict, tmp_folder: str) -> str:
 
-    transport = httpx.AsyncHTTPTransport(retries=3)
-    async with httpx.AsyncClient(transport=transport) as client:
+    async with httpx.AsyncClient() as client:
         if "run.app" in URL:
             # Use Google Cloud Run's authentication mechanism
             headers = {"Authorization": f"Bearer {_get_token()}"}
         else:
             headers = {}
-        resp = await client.post(URL, data=diagram_code, headers=headers)
+        resp = await client.post(URL, data=diagram_code, headers=headers, timeout=30.0)
 
     if resp.status_code != 200:
         print(resp)
