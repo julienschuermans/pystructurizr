@@ -80,7 +80,13 @@ def render(view):
     filename = f'output/{view}.svg'
     shutil.copy('output/diagram.svg', filename)
     print(f"Rendered SVG saved in {filename}")
-    webbrowser.open_new_tab("output/index.html")
+    # Check if running in WSL
+    index = "output/index.html"
+    if os.path.exists('/mnt/c/Windows/System32'):
+        # Open the file in the default Windows browser
+        webbrowser.open_new_tab(index)
+    else:
+        webbrowser.open_new_tab(f"file://{os.getcwd()}/{index}")
 
 
 @click.command()
